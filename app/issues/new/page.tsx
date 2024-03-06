@@ -1,5 +1,5 @@
 'use client';
-import { TextArea, TextField } from '@radix-ui/themes';
+import { Button, TextArea, TextField } from '@radix-ui/themes';
 
 const NewIssuePage = () => {
   return (
@@ -8,6 +8,7 @@ const NewIssuePage = () => {
         <TextField.Input placeholder="Title" />
       </TextField.Root>
       <TextArea placeholder="description" />
+      <Button>Submit New Issue</Button>
     </div>
   );
 };
