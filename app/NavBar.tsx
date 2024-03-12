@@ -11,6 +11,7 @@ import {
   Flex,
   Text,
 } from '@radix-ui/themes';
+import { Skeleton } from '@/app/components';
 
 const NavMenu = () => {
   const currentPath = usePathname();
@@ -44,7 +45,7 @@ const NavMenu = () => {
 
 const UserDropdown = () => {
   const { status, data: session } = useSession();
-  if (status === 'loading') return null;
+  if (status === 'loading') return <Skeleton width="3rem" />;
   if (status === 'unauthenticated')
     return <Link href="/api/auth/signin">Sign In</Link>;
   return (
