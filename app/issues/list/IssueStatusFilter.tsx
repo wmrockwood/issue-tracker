@@ -12,16 +12,23 @@ const statuses: { label: string; value: Status | '' }[] = [
 
 const IssueStatusFilter = () => {
   const router = useRouter();
-  const status = useSearchParams().get('status');
+  const searchParams = useSearchParams();
+  const filterStatus = searchParams.get('status');
   const changeFilter = (status: string) => {
-    const query = status ? `?status=${status}` : '';
-    router.push(`/issues/list${query}`);
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (searchParams.get('orderBy'))
+      params.append('orderBy', searchParams.get('orderBy')!);
+    if (searchParams.get('direction'))
+      params.append('direction', searchParams.get('direction')!);
+    const query = params.toString();
+    router.push(`/issues/list?${query}`);
   };
 
   return (
     <Flex align="center">
       <Text mr="5">Filter by Issue Type:</Text>
-      <Select.Root onValueChange={changeFilter} value={status || ''}>
+      <Select.Root onValueChange={changeFilter} value={filterStatus || ''}>
         <Select.Trigger />
         <Select.Content>
           {statuses.map((status) => (

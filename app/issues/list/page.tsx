@@ -38,9 +38,6 @@ const IssuesPage = async ({
     { label: 'Created', value: 'createdAt', className: 'hidden md:table-cell' },
   ];
 
-  console.log('value: ', orderBy);
-  console.log('direction: ', direction);
-
   const getArrowVal = (value: keyof Issue) => {
     if (value === orderBy && direction === 'asc') return <ArrowUpIcon />;
     if (value === orderBy && direction === 'desc') return <ArrowDownIcon />;
