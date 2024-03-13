@@ -4,20 +4,29 @@ import { IssueStatusBadge, Link } from '../../components';
 import NextLink from 'next/link';
 import IssueActions from './IssueActions';
 import { Issue, Status } from '@prisma/client';
-import { ArrowUpIcon } from '@radix-ui/react-icons';
+import { ArrowDownIcon, ArrowUpIcon } from '@radix-ui/react-icons';
 
 const IssuesPage = async ({
   searchParams,
 }: {
-  searchParams: { status: Status; orderBy: keyof Issue };
+  searchParams: {
+    status: Status;
+    orderBy: keyof Issue;
+    direction: 'asc' | 'desc';
+  };
 }) => {
   const statuses = Object.values(Status);
   const status = statuses.includes(searchParams.status)
     ? searchParams.status
     : undefined;
-  const issues = await prisma.issue.findMany({
-    where: { status: status },
-  });
+  const { orderBy, direction } = searchParams;
+  const issueParams = {
+    ...(status && { where: { status: status } }),
+    ...(orderBy &&
+      (direction === 'asc' || !direction) && { orderBy: { [orderBy]: 'asc' } }),
+    ...(orderBy && direction === 'desc' && { orderBy: { [orderBy]: 'desc' } }),
+  };
+  const issues = await prisma.issue.findMany(issueParams);
 
   const columns: {
     label: string;
@@ -28,26 +37,40 @@ const IssuesPage = async ({
     { label: 'Status', value: 'status', className: 'hidden md:table-cell' },
     { label: 'Created', value: 'createdAt', className: 'hidden md:table-cell' },
   ];
+
+  console.log('value: ', orderBy);
+  console.log('direction: ', direction);
+
+  const getArrowVal = (value: keyof Issue) => {
+    if (value === orderBy && direction === 'asc') return <ArrowUpIcon />;
+    if (value === orderBy && direction === 'desc') return <ArrowDownIcon />;
+    return null;
+  };
+
   return (
     <div>
       <IssueActions />
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
-            {columns.map((column) => (
-              <Table.ColumnHeaderCell
-                className={column.className}
-                key={column.label}
-              >
+            {columns.map(({ className, label, value }) => (
+              <Table.ColumnHeaderCell className={className} key={label}>
                 <Flex align="center" gap="1">
                   <NextLink
                     href={{
-                      query: { ...searchParams, orderBy: column.value },
+                      query: {
+                        ...searchParams,
+                        orderBy: value,
+                        direction:
+                          orderBy === value && direction === 'asc'
+                            ? 'desc'
+                            : 'asc',
+                      },
                     }}
                   >
-                    {column.label}
+                    {label}
                   </NextLink>
-                  {column.value === searchParams.orderBy && <ArrowUpIcon />}
+                  {getArrowVal(value)}
                 </Flex>
               </Table.ColumnHeaderCell>
             ))}
