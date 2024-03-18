@@ -1,8 +1,10 @@
 import { IssueStatusBadge } from '@/app/components';
+import { Prisma } from '@prisma/client';
 import { Issue, Status } from '@prisma/client';
 import { ArrowDownIcon, ArrowUpIcon } from '@radix-ui/react-icons';
-import { Flex, Link, Table } from '@radix-ui/themes';
+import { Avatar, Flex, Link, Table } from '@radix-ui/themes';
 import NextLink from 'next/link';
+
 export type SearchParams = {
   status: Status;
   orderBy: keyof Issue;
@@ -10,12 +12,18 @@ export type SearchParams = {
   page: string;
 };
 
+const issuesWithUser = Prisma.validator<Prisma.IssueDefaultArgs>()({
+  include: { assignedToUser: true },
+});
+
+type IssuesWithUser = Prisma.IssueGetPayload<typeof issuesWithUser>;
+
 interface Props {
   searchParams: SearchParams;
-  issues: Issue[];
+  issues: IssuesWithUser[];
 }
 
-const IssueTable = ({ searchParams, issues }: Props) => {
+const IssueTable = async ({ searchParams, issues }: Props) => {
   const { orderBy, direction } = searchParams;
 
   const columns: {
@@ -25,6 +33,11 @@ const IssueTable = ({ searchParams, issues }: Props) => {
   }[] = [
     { label: 'Issue', value: 'title' },
     { label: 'Status', value: 'status', className: 'hidden md:table-cell' },
+    {
+      label: 'Assigned To',
+      value: 'assignedToUserId',
+      className: 'hidden md:table-cell',
+    },
     { label: 'Created', value: 'createdAt', className: 'hidden md:table-cell' },
   ];
 
@@ -72,6 +85,23 @@ const IssueTable = ({ searchParams, issues }: Props) => {
             </Table.Cell>
             <Table.Cell className="hidden md:table-cell">
               <IssueStatusBadge status={issue.status} />
+            </Table.Cell>
+            <Table.Cell className="hidden md:table-cell">
+              {issue.assignedToUser ? (
+                <Flex gap="3" align="center">
+                  {issue.assignedToUser && issue.assignedToUser.name}
+                  {
+                    <Avatar
+                      src={issue.assignedToUser.image || undefined}
+                      fallback="?"
+                      size="1"
+                      radius="full"
+                    />
+                  }
+                </Flex>
+              ) : (
+                'Unassigned'
+              )}
             </Table.Cell>
             <Table.Cell className="hidden md:table-cell">
               {issue.createdAt.toDateString()}

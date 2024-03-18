@@ -9,7 +9,12 @@ const nextConfig = {
         ]
       }
     ]
-  }
+  },
+  compiler: {
+    styledComponents: {
+      displayName: false,
+    },
+  },
 }
 
 module.exports = nextConfig

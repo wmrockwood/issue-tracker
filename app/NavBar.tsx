@@ -20,6 +20,8 @@ const NavMenu = () => {
     { label: 'Dashboard', href: '/' },
     { label: 'Issues', href: '/issues/list' },
   ];
+
+  console.log(currentPath);
   return (
     <Flex align="center" gap="3">
       <Link href="/">
@@ -29,9 +31,9 @@ const NavMenu = () => {
         {links.map((link) => (
           <li key={link.label}>
             <Link
-              className={`nav-link ${
-                currentPath === link.href && 'text-zinc-900'
-              }`}
+              className={`${
+                currentPath === link.href ? 'text-zinc-900' : 'text-zinc-500'
+              } hover:text-zinc-800 transition-colors `}
               href={link.href}
             >
               {link.label}
